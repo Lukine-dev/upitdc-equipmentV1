@@ -7,7 +7,7 @@
         <div class="parallax-overlay"></div>
         <div class="parallax-content" data-aos="fade-up">
             <h1>University of the Philippines</h1>
-            <p class="lead">ICT Equipment Rental System</p>
+            <p class="lead">Unified Equipment Inventory and Request System</p>
             <a href="#about" class="btn btn-light btn-main mt-3">Get Started</a>
         </div>
     </section>

@@ -23,12 +23,12 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:administrator')->group(function () {
-        Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
         // ACCOUNT CREATION
      
 
         // ADMINISTRATOR ROUTES
-Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->group(function () {
+    Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->group(function () {
     Route::resource('users', AdminUserController::class)->except(['show']);
          });
     });
@@ -48,6 +48,20 @@ Route::middleware(['auth','verified', 'role:administrator'])->prefix('admin')->n
     Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     });
+
+
+    // EQUIPMENT CONTROL
+    // ADMIN - EQUIPMENT ROUTES
+Route::prefix('admin')->middleware(['auth', 'verified', 'role:administrator'])->name('admin.')->group(function () {
+    Route::get('/equipments', [App\Http\Controllers\Admin\EquipmentController::class, 'index'])->name('equipments.index');
+    Route::get('/equipments/create', [App\Http\Controllers\Admin\EquipmentController::class, 'create'])->name('equipments.create');
+    Route::post('/equipments', [App\Http\Controllers\Admin\EquipmentController::class, 'store'])->name('equipments.store');
+    Route::get('/equipments/{equipment}', [App\Http\Controllers\Admin\EquipmentController::class, 'show'])->name('equipments.show');
+    Route::get('/equipments/{equipment}/edit', [App\Http\Controllers\Admin\EquipmentController::class, 'edit'])->name('equipments.edit');
+    Route::put('/equipments/{equipment}', [App\Http\Controllers\Admin\EquipmentController::class, 'update'])->name('equipments.update');
+    Route::delete('/equipments/{equipment}', [App\Http\Controllers\Admin\EquipmentController::class, 'destroy'])->name('equipments.destroy');
+});
+
 });
 
 
@@ -58,10 +72,17 @@ Route::middleware(['auth','verified', 'role:administrator'])->prefix('admin')->n
         // editor tools here...
     });
 
-
-//     Route::prefix('editor')->middleware(['auth', 'role:editor'])->group(function () {
-//     Route::get('/equipments', ...)->name('editor.equipments');
-// });
+    // EQUIPMENT CONTROL
+    // EDITOR - EQUIPMENT ROUTES
+Route::prefix('editors')->middleware(['auth', 'verified', 'role:editor'])->name('editors.')->group(function () {
+    Route::get('/equipments', [App\Http\Controllers\Editor\EquipmentController::class, 'index'])->name('equipments.index');
+    Route::get('/equipments/create', [App\Http\Controllers\Editor\EquipmentController::class, 'create'])->name('equipments.create');
+    Route::post('/equipments', [App\Http\Controllers\Editor\EquipmentController::class, 'store'])->name('equipments.store');
+    Route::get('/equipments/{equipment}', [App\Http\Controllers\Editor\EquipmentController::class, 'show'])->name('equipments.show');
+    Route::get('/equipments/{equipment}/edit', [App\Http\Controllers\Editor\EquipmentController::class, 'edit'])->name('equipments.edit');
+    Route::put('/equipments/{equipment}', [App\Http\Controllers\Editor\EquipmentController::class, 'update'])->name('equipments.update');
+    Route::delete('/equipments/{equipment}', [App\Http\Controllers\Editor\EquipmentController::class, 'destroy'])->name('equipments.destroy');
+});
 
 
 

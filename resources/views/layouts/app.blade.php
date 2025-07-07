@@ -126,7 +126,7 @@
 
                     @if($role === 'editor')
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->is('editor/equipments*') ? 'active' : '' }}" href="{{ url('/editor/equipments') }}">Manage Equipments</a>
+                            <a class="nav-link {{ request()->is('editors/equipments*') ? 'active' : '' }}" href="{{ url('/editors/equipments') }}">Manage Equipments</a>
                         </li>
                     @endif
 
@@ -165,7 +165,7 @@
 
 
         {{-- MAIN CONTENT --}}
-        <main class="py-4">
+        <main class="">
             @yield('content')
         </main>
 
