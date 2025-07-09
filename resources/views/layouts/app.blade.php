@@ -70,6 +70,7 @@
             border-radius: 50px;
         }
     </style>
+    
 
     @stack('styles')
 </head>
@@ -115,12 +116,15 @@
                             <a class="nav-link dropdown-toggle {{ request()->is('admin/users*') ? 'active' : '' }}"
                                href="#" role="button" data-bs-toggle="dropdown">User Management</a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ route('users.index') }}">All Users</a></li>
-                                <li><a class="dropdown-item" href="{{ route('users.create') }}">Add Admin/Editor</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.users.index') }}">All Users</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.users.create') }}">Add Admin/Editor</a></li>
                             </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/equipments*') ? 'active' : '' }}" href="{{ url('/admin/equipments') }}">Equipment Inventory</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link {{ request()->is('admin/rentals*') ? 'active' : '' }}" href="{{ url('/admin/rentals') }}">Requests</a>
                         </li>
                     @endif
 
@@ -135,7 +139,7 @@
                             <a class="nav-link {{ request()->is('user/equipments*') ? 'active' : '' }}" href="{{ url('/user/equipments') }}">Browse Equipments</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->is('user/orders*') ? 'active' : '' }}" href="{{ url('/user/orders') }}">My Rentals</a>
+                            <a class="nav-link {{ request()->is('user/rentals*') ? 'active' : '' }}" href="{{ url('/user/rentals') }}">My Rentals</a>
                         </li>
                     @endif
 
@@ -168,11 +172,10 @@
         <main class="">
             @yield('content')
         </main>
+        
 
         {{-- FOOTER --}}
-        <footer>
-            &copy; {{ now()->year }} University of the Philippines | ICT Equipment Rental System
-        </footer>
+
     </div>
 
     {{-- AOS JS --}}

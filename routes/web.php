@@ -3,129 +3,161 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EditorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
+use App\Http\Controllers\Editor\EquipmentController as EditorEquipmentController;
+use App\Http\Controllers\Admin\AdminRentalController;
+use App\Http\Controllers\User\UserRentalController;
+use App\Http\Controllers\User\EquipmentController;
 
 
+// 🟢 Public Landing Page
 Route::get('/', function () {
     return view('landing-page');
 });
 
+// 🟢 Auth (Breeze/UI)
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// 🟢 Default Authenticated Home
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-
-
+// 🔒 Authenticated + Verified Routes
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::middleware('role:administrator')->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-        // ACCOUNT CREATION
-     
+    /*
+    |--------------------------------------------------------------------------
+    | ADMINISTRATOR ROUTES
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('role:administrator')
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
 
-        // ADMINISTRATOR ROUTES
-    Route::middleware(['auth', 'verified', 'role:administrator'])->prefix('admin')->group(function () {
-    Route::resource('users', AdminUserController::class)->except(['show']);
-         });
+        // Dashboard
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+        // User Management
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/search', [AdminUserController::class, 'search'])->name('users.search');
+        Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+
+        // Equipment Management
+        Route::prefix('/equipments')->name('equipments.')->group(function () {
+            Route::get('/', [AdminEquipmentController::class, 'index'])->name('index');
+            Route::get('/create', [AdminEquipmentController::class, 'create'])->name('create');
+            Route::post('/', [AdminEquipmentController::class, 'store'])->name('store');
+            Route::get('/{equipment}', [AdminEquipmentController::class, 'show'])->name('show');
+            Route::get('/{equipment}/edit', [AdminEquipmentController::class, 'edit'])->name('edit');
+            Route::put('/{equipment}', [AdminEquipmentController::class, 'update'])->name('update');
+            Route::delete('/{equipment}', [AdminEquipmentController::class, 'destroy'])->name('destroy');
+        });
     });
 
-Route::middleware(['auth','verified', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
-
-    // USER CONTROLS
-    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('users.index');
-    Route::get('/admin/users/search', [AdminUserController::class, 'search'])->name('users.search'); // ← for AJAX
-    Route::get('/admin/users/create', [AdminUserController::class, 'create'])->name('users.create');
-    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('users.store'); // ← this is the missing route
-    Route::get('/admin/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
-    Route::put('/admin/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
-    Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
-
-    // INSIGHTS AND ADMIN DASHBOARD
     Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/rental-requests', [AdminRentalController::class, 'index'])->name('rental.index');
+    Route::get('/rental-requests/{id}/form', [AdminRentalController::class, 'showRequestForm'])->name('rental.form');
+    Route::post('/rental-requests/{id}/approve', [AdminRentalController::class, 'approve'])->name('rental.approve');
+    Route::get('/rentals/{id}/pdf', [AdminRentalController::class, 'downloadForm'])->name('rental.downloadForm');
+    });
+
+    Route::middleware(['auth', 'verified', 'role:administrator'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::get('/rentals', [AdminRentalController::class, 'index'])->name('rentals.index');
+        Route::get('/rentals/{id}', [AdminRentalController::class, 'show'])->name('rentals.show');
+        Route::post('/rentals/{id}/approve', [AdminRentalController::class, 'approve'])->name('rentals.approve');
+        Route::post('/rentals/{id}/decline', [AdminRentalController::class, 'decline'])->name('rentals.decline');
+        Route::post('/rentals/{id}/return', [AdminRentalController::class, 'markReturned'])->name('rentals.return');
+        Route::get('/rentals/{id}/form', [AdminRentalController::class, 'downloadForm'])->name('rentals.form');
+    });
+    /*
+    |--------------------------------------------------------------------------
+    | EDITOR ROUTES
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('role:editor')
+        ->prefix('editors')
+        ->name('editors.')
+        ->group(function () {
+        
+        // Dashboard
+        Route::get('/dashboard', [EditorController::class, 'index'])->name('dashboard');
+
+        // Equipment Management
+        Route::get('/equipments', [EditorEquipmentController::class, 'index'])->name('equipments.index');
+        Route::get('/equipments/create', [EditorEquipmentController::class, 'create'])->name('equipments.create');
+        Route::post('/equipments', [EditorEquipmentController::class, 'store'])->name('equipments.store');
+        Route::get('/equipments/{equipment}', [EditorEquipmentController::class, 'show'])->name('equipments.show');
+        Route::get('/equipments/{equipment}/edit', [EditorEquipmentController::class, 'edit'])->name('equipments.edit');
+        Route::put('/equipments/{equipment}', [EditorEquipmentController::class, 'update'])->name('equipments.update');
+        Route::delete('/equipments/{equipment}', [EditorEquipmentController::class, 'destroy'])->name('equipments.destroy');
     });
 
 
-    // EQUIPMENT CONTROL
-    // ADMIN - EQUIPMENT ROUTES
-Route::prefix('admin')->middleware(['auth', 'verified', 'role:administrator'])->name('admin.')->group(function () {
-    Route::get('/equipments', [App\Http\Controllers\Admin\EquipmentController::class, 'index'])->name('equipments.index');
-    Route::get('/equipments/create', [App\Http\Controllers\Admin\EquipmentController::class, 'create'])->name('equipments.create');
-    Route::post('/equipments', [App\Http\Controllers\Admin\EquipmentController::class, 'store'])->name('equipments.store');
-    Route::get('/equipments/{equipment}', [App\Http\Controllers\Admin\EquipmentController::class, 'show'])->name('equipments.show');
-    Route::get('/equipments/{equipment}/edit', [App\Http\Controllers\Admin\EquipmentController::class, 'edit'])->name('equipments.edit');
-    Route::put('/equipments/{equipment}', [App\Http\Controllers\Admin\EquipmentController::class, 'update'])->name('equipments.update');
-    Route::delete('/equipments/{equipment}', [App\Http\Controllers\Admin\EquipmentController::class, 'destroy'])->name('equipments.destroy');
-});
-
-});
-
-
-
-    //EDITOR
-    Route::middleware('role:editor')->group(function () {
-        Route::get('/editor/dashboard', [EditorController::class, 'index'])->name('editor.dashboard');
-        // editor tools here...
-    });
-
-    // EQUIPMENT CONTROL
-    // EDITOR - EQUIPMENT ROUTES
-Route::prefix('editors')->middleware(['auth', 'verified', 'role:editor'])->name('editors.')->group(function () {
-    Route::get('/equipments', [App\Http\Controllers\Editor\EquipmentController::class, 'index'])->name('equipments.index');
-    Route::get('/equipments/create', [App\Http\Controllers\Editor\EquipmentController::class, 'create'])->name('equipments.create');
-    Route::post('/equipments', [App\Http\Controllers\Editor\EquipmentController::class, 'store'])->name('equipments.store');
-    Route::get('/equipments/{equipment}', [App\Http\Controllers\Editor\EquipmentController::class, 'show'])->name('equipments.show');
-    Route::get('/equipments/{equipment}/edit', [App\Http\Controllers\Editor\EquipmentController::class, 'edit'])->name('equipments.edit');
-    Route::put('/equipments/{equipment}', [App\Http\Controllers\Editor\EquipmentController::class, 'update'])->name('equipments.update');
-    Route::delete('/equipments/{equipment}', [App\Http\Controllers\Editor\EquipmentController::class, 'destroy'])->name('equipments.destroy');
-});
-
-
-
-
-    //USER
+    /*
+    |--------------------------------------------------------------------------
+    | USER ROUTES
+    |--------------------------------------------------------------------------
+    */
     Route::middleware('role:user')->group(function () {
+        // Dashboard
         Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
-        // user equipment listings, orders...
+
+      
+
     });
 
+    
 
-//     Route::prefix('user')->middleware(['auth', 'role:user'])->group(function () {
-//     Route::get('/equipments', ...)->name('user.equipments');
-//     Route::get('/orders', ...)->name('user.orders');
-// });
+   Route::middleware(['auth', 'verified', 'role:user'])->prefix('user')->name('user.')->group(function () {
+        Route::get('/rentals', [UserRentalController::class, 'index'])->name('rentals.index');
+        Route::get('/rentals/create', [UserRentalController::class, 'create'])->name('rentals.create');
+        Route::post('/rentals', [UserRentalController::class, 'store'])->name('rentals.store');
 
+
+
+        // Equipments
+        Route::get('/equipments', [EquipmentController::class, 'index'])->name('equipments.index');
+            Route::get('/equipments/{id}', [EquipmentController::class, 'show'])->name('equipments.show');
+
+    });
+    
 });
 
 
 
+/*
+|--------------------------------------------------------------------------
+| EMAIL VERIFICATION ROUTES
+|--------------------------------------------------------------------------
+*/
 
-
-
-
-// 🟡 Shows the verify-email notice to logged-in users who aren't verified
+// Show verification notice to unverified users
 Route::get('/email/verify', function () {
     return view('auth.verify-email');
 })->middleware('auth')->name('verification.notice');
 
-
-// 🟢 Handles the actual email verification from the link
+// Handle email verification from the clicked link
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
-    return redirect()->intended(); // ← Will return to originally intended page
+    return redirect()->intended();
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
-
-
-// 🔁 Resends verification email (POST only — must use form, not link!)
+// Resend verification email (POST only)
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-
-
-

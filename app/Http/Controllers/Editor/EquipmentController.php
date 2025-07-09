@@ -89,9 +89,19 @@ class EquipmentController extends Controller
         return redirect()->route('editors.equipments.index')->with('message', 'Equipment updated.');
     }
 
-    public function destroy(Equipment $equipment)
+
+     public function destroy(Equipment $equipment)
     {
+        if ($equipment->rentals()->where('status', '!=', 'returned')->exists()) {
+            return back()->with('error', 'Equipment cannot be deleted while in use.');
+        }
+
         $equipment->delete();
-        return back()->with('message', 'Equipment deleted.');
+        return redirect()->route('admin.equipments.index')->with('success', 'Equipment deleted successfully.');
     }
+    // public function destroy(Equipment $equipment)
+    // {
+    //     $equipment->delete();
+    //     return back()->with('message', 'Equipment deleted.');
+    // }
 }

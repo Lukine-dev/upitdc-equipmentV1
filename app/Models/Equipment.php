@@ -13,15 +13,16 @@ class Equipment extends Model
         'name',
         'description',
         'category',
+        'serial_number',
         'image_path',
         'stock',
         'status',
     ];
 
-    // public function requests()
-    // {
-    //     return $this->hasMany(Request::class);
-    // }
+    public function requests()
+    {
+        return $this->hasMany(ReleaseRequest::class);
+    }
 }
 
 

@@ -6,6 +6,7 @@
         <h3 class="mb-0">{{ $equipment->name }}</h3>
         <a href="{{ route('admin.equipments.index') }}" class="btn btn-outline-secondary btn-sm">← Back to List</a>
     </div>
+    
 
     <div class="card shadow-sm border-0">
         <div class="row g-0">

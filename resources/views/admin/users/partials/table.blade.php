@@ -9,9 +9,9 @@
     @endif
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <a href="{{ route('users.create') }}" class="btn btn-success">Create Admin/Editor</a>
+        <a href="{{ route('admin.users.create') }}" class="btn btn-success">Create Admin/Editor</a>
 
-        <form action="{{ route('users.index') }}" method="GET" class="d-flex" role="search">
+        <form action="{{ route('admin.users.index') }}" method="GET" class="d-flex" role="search">
             <input type="text" name="search" class="form-control me-2" placeholder="Search by name, email, or role" value="{{ $search ?? '' }}">
             <button type="submit" class="btn btn-outline-primary">Search</button>
         </form>
@@ -68,9 +68,9 @@
                             @endif
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-primary me-1">Edit</a>
+                            <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-primary me-1">Edit</a>
 
-                            <form action="{{ route('users.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this user?')">
+                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this user?')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-sm btn-danger">Delete</button>

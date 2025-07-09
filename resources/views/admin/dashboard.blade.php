@@ -2,83 +2,86 @@
 
 @section('content')
 <div class="container">
-    <h2 class="mb-4">📊 Admin Dashboard</h2>
+    <h2 class="mb-4">Admin Dashboard</h2>
 
-    {{-- Insight Cards --}}
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary">
-                <div class="card-body">
-                    <h5 class="card-title">Total Users</h5>
-                    <p class="fs-4">{{ $totalUsers }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success">
-                <div class="card-body">
-                    <h5 class="card-title">Administrators</h5>
-                    <p class="fs-4">{{ $totalAdmins }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning">
-                <div class="card-body">
-                    <h5 class="card-title">Editors</h5>
-                    <p class="fs-4">{{ $totalEditors }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-danger">
-                <div class="card-body">
-                    <h5 class="card-title">Unverified</h5>
-                    <p class="fs-4">{{ $unverifiedUsers }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- Nav Tabs --}}
+    <ul class="nav nav-tabs mb-3" id="dashboardTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="user-tab" data-bs-toggle="tab" data-bs-target="#user" type="button" role="tab">User Stats</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="equipment-tab" data-bs-toggle="tab" data-bs-target="#equipment" type="button" role="tab">Equipment Stats</button>
+        </li>
+    </ul>
 
-    {{-- Recent Users Table --}}
-    <div class="card shadow-sm">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">🕒 Recent Registrations</h5>
+    <div class="tab-content" id="dashboardTabsContent">
+        {{-- User Stats Tab --}}
+        <div class="tab-pane fade show active" id="user" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-md-3"><div class="card text-bg-primary"><div class="card-body"><h5>Total Users</h5><p class="fs-4">{{ $totalUsers }}</p></div></div></div>
+                <div class="col-md-3"><div class="card text-bg-success"><div class="card-body"><h5>Admins</h5><p class="fs-4">{{ $totalAdmins }}</p></div></div></div>
+                <div class="col-md-3"><div class="card text-bg-warning"><div class="card-body"><h5>Editors</h5><p class="fs-4">{{ $totalEditors }}</p></div></div></div>
+                <div class="col-md-3"><div class="card text-bg-danger"><div class="card-body"><h5>Unverified</h5><p class="fs-4">{{ $unverifiedUsers }}</p></div></div></div>
+            </div>
+
+            <h5>Recent Users</h5>
+            <ul class="list-group mb-4">
+                @foreach ($recentUsers as $user)
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ $user->name }} <span class="badge bg-secondary">{{ $user->role }}</span>
+                    </li>
+                @endforeach
+            </ul>
         </div>
-        <div class="card-body table-responsive">
-            <table class="table table-bordered table-striped align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Verified</th>
-                        <th>Registered</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($recentUsers as $index => $user)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td><span class="badge bg-info text-dark">{{ ucfirst($user->role) }}</span></td>
-                            <td>
-                                @if($user->email_verified_at)
-                                    <span class="text-success">Yes</span>
-                                @else
-                                    <span class="text-danger">No</span>
-                                @endif
-                            </td>
-                            <td>{{ $user->created_at->diffForHumans() }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="6" class="text-center">No recent users.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+
+        {{-- Equipment Stats Tab --}}
+        <div class="tab-pane fade" id="equipment" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-md-3"><div class="card text-bg-primary"><div class="card-body"><h5>Total Equipment</h5><p class="fs-4">{{ $totalEquipment }}</p></div></div></div>
+                <div class="col-md-3"><div class="card text-bg-success"><div class="card-body"><h5>Available</h5><p class="fs-4">{{ $availableEquipment }}</p></div></div></div>
+                <div class="col-md-3"><div class="card text-bg-secondary"><div class="card-body"><h5>Reserved</h5><p class="fs-4">{{ $reservedEquipment }}</p></div></div></div>
+                <div class="col-md-3"><div class="card text-bg-danger"><div class="card-body"><h5>Unavailable</h5><p class="fs-4">{{ $unavailableEquipment }}</p></div></div></div>
+            </div>
+
+            {{-- Chart: Requests by Status --}}
+            <div class="mt-5">
+                <h5 class="mb-3">Equipment Request Status</h5>
+                <canvas id="statusChart" height="100"></canvas>
+            </div>
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Pending', 'Approved', 'Declined', 'Returned'],
+            datasets: [{
+                label: 'Requests',
+                data: [
+                    {{ $requestsByStatus['pending'] ?? 0 }},
+                    {{ $requestsByStatus['approved'] ?? 0 }},
+                    {{ $requestsByStatus['declined'] ?? 0 }},
+                    {{ $requestsByStatus['returned'] ?? 0 }}
+                ],
+                backgroundColor: ['#facc15', '#22c55e', '#ef4444', '#6b7280'],
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+</script>
 @endsection

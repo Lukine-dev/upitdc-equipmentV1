@@ -18,10 +18,6 @@
             <input type="text" name="name" class="form-control" required value="{{ old('name', $equipment->name) }}">
         </div>
 
-        <div class="mb-3">
-            <label>Category</label>
-            <input type="text" name="category" class="form-control" value="{{ old('category', $equipment->category) }}">
-        </div>
 
         <div class="mb-3">
             <label>Description</label>
